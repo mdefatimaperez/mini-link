@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mini-link — Acortador de URLs gratis</title>
+  <meta name="description" content="Acortá cualquier URL larga en segundos. Gratis, sin registro, sin límites." />
+  <meta property="og:title" content="Mini-link  — Acortador de URLs gratis" />
+  <meta property="og:description" content="Acortá cualquier URL larga en segundos. Gratis, sin registro, sin límites." />
+  <meta property="og:type" content="website" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #cdb4db;
+      --accent-hover: #b899cc;
+      --text: #000000;
+      --muted: #000000;
+      --error: #e53e3e;
+      --radius: 12px;
+    }
+
+    /* ── Animated gradient background ── */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 16px 80px;
+      background: linear-gradient(135deg, #bde0fe, #ffafcc, #a2d2ff);
+      position: relative;
+    }
+
+    /* ── Dark mode ── */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --text: #f0f0f0;
+        --muted: #9a9ab0;
+      }
+
+      .card {
+        background: rgba(30, 30, 50, 0.85) !important;
+        border-color: rgba(255, 255, 255, 0.12) !important;
+        color: #f0f0f0;
+      }
+
+      input[type="url"] {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #f0f0f0 !important;
+        border-color: rgba(255, 255, 255, 0.2) !important;
+      }
+
+      input[type="url"]::placeholder { color: #9a9ab0 !important; }
+
+      .history-item {
+        background: rgba(255, 255, 255, 0.06) !important;
+        border-color: rgba(255, 255, 255, 0.1) !important;
+      }
+
+      .error-msg { background: #2d1515 !important; border-color: #6b2020 !important; }
+
+      .cloud { background: linear-gradient(to bottom, #2d3748, #3d2a40) !important; opacity: 0.4 !important; }
+      .cloud::before, .cloud::after { background: linear-gradient(to bottom, #2d3748, #3d2a40) !important; }
+
+      .star { opacity: 1 !important; filter: brightness(1.5); }
+
+      footer { color: #9a9ab0; }
+      footer a { color: #9a9ab0; }
+    }
+
+    /* ── Language Picker ── */
+    #lang-picker {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 100;
+    }
+
+    #lang-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 20px;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .2s;
+      color: inherit;
+    }
+
+    #lang-btn:hover { background: rgba(255, 255, 255, 1); }
+
+    #lang-menu {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: 12px;
+      padding: 6px;
+      list-style: none;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+      min-width: 148px;
+      transform: translateY(-4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform .15s ease, opacity .15s ease;
+    }
+
+    #lang-menu.open {
+      transform: translateY(0);
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #lang-menu li {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      transition: background .15s;
+      white-space: nowrap;
+      color: #2d2d2d;
+    }
+
+    #lang-menu li:hover { background: rgba(0, 0, 0, 0.06); }
+
+    .lang-check {
+      width: 14px;
+      text-align: center;
+      color: var(--accent);
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      #lang-btn {
+        background: rgba(30, 30, 50, 0.85);
+        color: #f0f0f0;
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+      #lang-btn:hover { background: rgba(30, 30, 50, 1); }
+      #lang-menu {
+        background: rgba(30, 30, 50, 0.97);
+        color: #f0f0f0;
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      #lang-menu li { color: #f0f0f0; }
+      #lang-menu li:hover { background: rgba(255, 255, 255, 0.08); }
+    }
+
+    /* ── Clouds (CSS only, no images) ── */
+    .cloud {
+      position: fixed;
+      background: linear-gradient(to bottom, #fff, #ffc8dd);
+      border-radius: 50px;
+      opacity: 0.7;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .cloud::before,
+    .cloud::after {
+      content: '';
+      position: absolute;
+      background: linear-gradient(to bottom, #fff, #ffc8dd);
+      border-radius: 50%;
+    }
+
+    .cloud-1 {
+      width: 180px; height: 50px;
+      top: 8%; left: -200px;
+      animation: floatCloud 35s linear infinite;
+    }
+    .cloud-1::before {
+      width: 80px; height: 70px;
+      top: -35px; left: 25px;
+    }
+    .cloud-1::after {
+      width: 55px; height: 55px;
+      top: -28px; left: 80px;
+    }
+
+    .cloud-2 {
+      width: 120px; height: 38px;
+      top: 22%; left: 110vw;
+      animation: floatCloudReverse 28s linear infinite -14s;
+    }
+    .cloud-2::before {
+      width: 55px; height: 50px;
+      top: -28px; left: 18px;
+    }
+    .cloud-2::after {
+      width: 40px; height: 40px;
+      top: -20px; left: 58px;
+    }
+
+    .cloud-3 {
+      width: 220px; height: 60px;
+      top: 45%; left: -250px;
+      animation: floatCloud 42s linear infinite -20s;
+    }
+    .cloud-3::before {
+      width: 90px; height: 85px;
+      top: -45px; left: 35px;
+    }
+    .cloud-3::after {
+      width: 70px; height: 65px;
+      top: -35px; left: 100px;
+    }
+
+    .cloud-4 {
+      width: 150px; height: 44px;
+      top: 65%; left: 110vw;
+      animation: floatCloudReverse 32s linear infinite -16s;
+    }
+    .cloud-4::before {
+      width: 65px; height: 60px;
+      top: -32px; left: 22px;
+    }
+    .cloud-4::after {
+      width: 50px; height: 48px;
+      top: -25px; left: 70px;
+    }
+
+    .cloud-5 {
+      width: 100px; height: 30px;
+      top: 12%; left: -130px;
+      animation: floatCloud 25s linear infinite -8s;
+    }
+    .cloud-5::before {
+      width: 45px; height: 42px;
+      top: -22px; left: 15px;
+    }
+    .cloud-5::after {
+      width: 35px; height: 32px;
+      top: -16px; left: 48px;
+    }
+
+    .cloud-6 {
+      width: 200px; height: 55px;
+      top: 80%; left: 110vw;
+      animation: floatCloudReverse 38s linear infinite -19s;
+    }
+    .cloud-6::before {
+      width: 85px; height: 75px;
+      top: -40px; left: 30px;
+    }
+    .cloud-6::after {
+      width: 65px; height: 60px;
+      top: -32px; left: 95px;
+    }
+
+    @keyframes floatCloud {
+      from { left: -300px; }
+      to   { left: 110vw; }
+    }
+
+    @keyframes floatCloudReverse {
+      from { left: 110vw; }
+      to   { left: -300px; }
+    }
+
+    @media (max-width: 480px) {
+      .cloud-1 { width: 100px; height: 30px; }
+      .cloud-1::before { width: 45px; height: 40px; top: -22px; left: 14px; }
+      .cloud-1::after  { width: 32px; height: 32px; top: -16px; left: 46px; }
+
+      .cloud-3 { width: 130px; height: 36px; }
+      .cloud-3::before { width: 55px; height: 52px; top: -28px; left: 20px; }
+      .cloud-3::after  { width: 42px; height: 40px; top: -20px; left: 62px; }
+
+      .cloud-6 { width: 120px; height: 34px; }
+      .cloud-6::before { width: 52px; height: 46px; top: -24px; left: 18px; }
+      .cloud-6::after  { width: 40px; height: 38px; top: -18px; left: 57px; }
+    }
+
+    /* ── Stars ── */
+    .star {
+      position: fixed;
+      border-radius: 50%;
+      background: #fffde7;
+      z-index: 0;
+      pointer-events: none;
+      animation: twinkle var(--dur, 3s) ease-in-out infinite alternate;
+    }
+
+    @keyframes twinkle {
+      from { opacity: 0.2; }
+      to   { opacity: 1; }
+    }
+
+    /* ── Layout ── */
+    .container {
+      width: 100%;
+      max-width: 580px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Header ── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    header svg { flex-shrink: 0; }
+
+    .logo-text {
+      font-size: 55px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--text);
+    }
+
+    .logo-text span { color: var(--accent); }
+
+    .tagline {
+      font-size: .85rem;
+      color: #000000 !important;
+      margin-top: 2px;
+    }
+
+    /* ── Cards (glassmorphism) ── */
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      border-radius: var(--radius);
+      padding: 28px 24px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      margin-bottom: 16px;
+      color: #2d2d2d;
+    }
+
+    /* ── Input row ── */
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    input[type="url"] {
+      flex: 1;
+      padding: 13px 16px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: #2d2d2d;
+      background: rgba(255, 255, 255, 0.9);
+      border: 1.5px solid rgba(0, 0, 0, 0.15);
+      border-radius: 8px;
+      outline: none;
+      transition: border-color .2s;
+      line-height: 1.6;
+    }
+
+    input[type="url"]::placeholder { color: #999; }
+    input[type="url"]:focus { border-color: var(--accent); }
+    input[type="url"].invalid { border-color: var(--error); }
+
+    .btn {
+      padding: 13px 22px;
+      font-size: 1rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: #fff1f1;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s, transform .1s, opacity .2s;
+    }
+
+    .btn:hover { background: var(--accent-hover); }
+    .btn:active { transform: scale(.97); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* ── Validation message ── */
+    .val-msg {
+      font-size: .8rem;
+      color: var(--error);
+      margin-top: 8px;
+      min-height: 18px;
+      transition: opacity .2s;
+    }
+
+    /* ── Spinner ── */
+    .spinner-wrap {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0 4px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+
+    .spinner-wrap.show { display: flex; }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2.5px solid rgba(0, 0, 0, 0.1);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Result card ── */
+    #result-card {
+      display: none;
+      animation: fadeUp .3s ease;
+    }
+
+    #result-card.show { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-label {
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .result-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .short-url {
+      flex: 1;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--accent);
+      word-break: break-all;
+      text-decoration: none;
+    }
+
+    .short-url:hover { text-decoration: underline; }
+
+    .btn-copy {
+      padding: 9px 16px;
+      font-size: .85rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--accent);
+      background: transparent;
+      border: 1.5px solid var(--accent);
+      border-radius: 7px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .2s, color .2s;
+    }
+
+    .btn-copy:hover { background: var(--accent); color: #fff; }
+
+    .savings {
+      margin-top: 12px;
+      font-size: .82rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .savings strong { color: var(--accent); }
+
+    /* ── Error message ── */
+    .error-msg {
+      display: none;
+      padding: 12px 16px;
+      background: #fff1f1;
+      border: 1px solid #fecaca;
+      border-radius: 8px;
+      color: var(--error);
+      font-size: .88rem;
+      margin-top: 12px;
+      animation: fadeUp .25s ease;
+      line-height: 1.6;
+    }
+
+    .error-msg.show { display: block; }
+
+    /* ── History ── */
+    #history-section {
+      display: none;
+    }
+
+    #history-section.show { display: block; }
+
+    .history-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .history-title {
+      font-size: .8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      color: var(--muted);
+    }
+
+    .btn-clear {
+      font-size: .78rem;
+      font-family: inherit;
+      color: var(--muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      transition: color .2s, background .2s;
+    }
+
+    .btn-clear:hover { color: var(--error); background: rgba(229, 62, 62, .08); }
+
+    .history-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .history-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 8px;
+      animation: fadeUp .25s ease;
+    }
+
+    .history-item .hi-short {
+      font-weight: 600;
+      color: var(--accent);
+      text-decoration: none;
+      font-size: .92rem;
+      flex-shrink: 0;
+    }
+
+    .history-item .hi-short:hover { text-decoration: underline; }
+
+    .history-item .hi-orig {
+      flex: 1;
+      font-size: .78rem;
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .history-item .btn-copy-sm {
+      padding: 5px 10px;
+      font-size: .75rem;
+      font-weight: 600;
+      font-family: inherit;
+      color: var(--accent);
+      background: transparent;
+      border: 1px solid var(--accent);
+      border-radius: 5px;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background .2s, color .2s;
+    }
+
+    .history-item .btn-copy-sm:hover { background: var(--accent); color: #fff; }
+
+    /* ── Footer ── */
+    footer {
+      margin-top: 40px;
+      text-align: center;
+      font-size: .78rem;
+      color: #666;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    footer a { color: #666; text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    .footer-github svg {
+      display: block;
+      transition: color .2s;
+    }
+
+    .footer-github:hover svg { color: var(--accent); }
+
+    /* ── Responsive ── */
+    @media (max-width: 480px) {
+      body { padding: 24px 1rem 60px; }
+
+      .logo-text { font-size: 1.6rem; }
+
+      .input-row { flex-direction: column; }
+      .btn { width: 100%; }
+      .result-row { flex-wrap: wrap; }
+
+      p, .savings, .error-msg { font-size: 15px; line-height: 1.6; }
+    }
+
+    @media (min-width: 481px) {
+      p, .savings, .error-msg { font-size: 16px; line-height: 1.6; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Language Picker -->
+<div id="lang-picker">
+  <button id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+    <span id="lang-flag">🇦🇷</span>&nbsp;<span id="lang-code">ES</span>
+  </button>
+  <ul id="lang-menu" role="listbox" aria-label="Idioma">
+    <li data-lang="es" role="option"><span class="lang-check" id="check-es">✓</span>🇦🇷 Español</li>
+    <li data-lang="en" role="option"><span class="lang-check" id="check-en"></span>🇺🇸 English</li>
+    <li data-lang="pt" role="option"><span class="lang-check" id="check-pt"></span>🇧🇷 Português</li>
+  </ul>
+</div>
+
+<!-- Clouds -->
+<div class="cloud cloud-1" aria-hidden="true"></div>
+<div class="cloud cloud-2" aria-hidden="true"></div>
+<div class="cloud cloud-3" aria-hidden="true"></div>
+<div class="cloud cloud-4" aria-hidden="true"></div>
+<div class="cloud cloud-5" aria-hidden="true"></div>
+<div class="cloud cloud-6" aria-hidden="true"></div>
+
+<div class="container">
+
+  <header>
+    <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+      <rect width="36" height="36" rx="9" fill="#cdb4db"/>
+      <path d="M21 11.5h2.5A4.5 4.5 0 0 1 28 16v0a4.5 4.5 0 0 1-4.5 4.5H21" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+      <path d="M15 24.5h-2.5A4.5 4.5 0 0 1 8 20v0a4.5 4.5 0 0 1 4.5-4.5H15" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="14" y1="18" x2="22" y2="18" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>
+    </svg>
+    <div>
+      <div class="logo-text">Mini-link</div>
+      <div style="color: #000000;" class="tagline" data-i18n="logo_sub">Acortá cualquier URL al instante · Sin registro · 100% gratis</div>
+    </div>
+  </header>
+
+  <!-- Main card -->
+  <div class="card">
+    <div class="input-row">
+      <input
+        type="url"
+        id="url-input"
+        data-i18n-placeholder="input_placeholder"
+        placeholder="https://ejemplo.com/una/url/muy/larga..."
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="btn" id="shorten-btn" data-i18n="btn_shorten">Acortar URL →</button>
+    </div>
+    <div class="val-msg" id="val-msg" aria-live="polite"></div>
+    <div class="spinner-wrap" id="spinner">
+      <div class="spinner"></div>
+      <span data-i18n="btn_loading">Acortando...</span>
+    </div>
+    <div class="error-msg" id="error-msg" aria-live="assertive"></div>
+  </div>
+
+  <!-- Result card -->
+  <div class="card" id="result-card" aria-live="polite">
+    <div class="result-label" data-i18n="result_label">Tu link corto</div>
+    <div class="result-row">
+      <a class="short-url" id="short-url-link" href="#" target="_blank" rel="noopener"></a>
+      <button class="btn-copy" id="copy-btn" data-i18n="btn_copy">Copiar</button>
+    </div>
+    <div class="savings" id="savings-msg"></div>
+  </div>
+
+  <!-- History -->
+  <div id="history-section">
+    <div class="card">
+      <div class="history-header">
+        <span class="history-title" data-i18n="history_title">Links recientes</span>
+        <button class="btn-clear" id="clear-btn" data-i18n="history_clear">Limpiar historial</button>
+      </div>
+      <ul class="history-list" id="history-list"></ul>
+    </div>
+  </div>
+
+  <footer>
+    <span data-i18n="footer_love">Hecho con amor, café y una pizca de IA ☕</span>
+    <a
+      class="footer-github"
+      href="https://github.com/TU_USUARIO/TU_REPO"
+      target="_blank"
+      rel="noopener"
+      data-i18n-title="github_tooltip"
+      title="Ver en GitHub"
+      aria-label="Ver en GitHub"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" color="#666" aria-hidden="true">
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.013-1.703-2.782.605-3.369-1.34-3.369-1.34-.454-1.154-1.11-1.462-1.11-1.462-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0 1 12 6.836a9.59 9.59 0 0 1 2.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.202 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/>
+      </svg>
+    </a>
+    <span data-i18n="footer_powered">Powered by is.gd API · Sin servidores propios</span>
+  </footer>
+
+</div>
+
+<script>
+  // ── Stars ────────────────────────────────────────────────────────────────
+  (function createStars() {
+    const count = 30;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < count; i++) {
+      const star = document.createElement('div');
+      star.className = 'star';
+      const size = Math.random() * 2 + 2;
+      const dur  = (Math.random() * 3 + 2).toFixed(1);
+      star.style.cssText = [
+        `width:${size}px`,
+        `height:${size}px`,
+        `left:${Math.random() * 100}vw`,
+        `top:${Math.random() * 100}vh`,
+        `--dur:${dur}s`,
+        `animation-delay:${(Math.random() * 5).toFixed(1)}s`
+      ].join(';');
+      star.setAttribute('aria-hidden', 'true');
+      frag.appendChild(star);
+    }
+    document.body.appendChild(frag);
+  })();
+
+  // ── Translations ──────────────────────────────────────────────────────────
+  const TRANSLATIONS = {
+    es: {
+      logo_sub:          'Acortá cualquier URL al instante · Sin registro · 100% gratis',
+      input_label:       'Pegá tu URL larga',
+      input_placeholder: 'https://ejemplo.com/una/url/muy/larga...',
+      btn_shorten:       'Acortar URL →',
+      btn_loading:       'Acortando...',
+      btn_copy:          'Copiar',
+      btn_copied:        '¡Copiado!',
+      result_label:      'Tu link corto',
+      pill_secure:       'is.gd · seguro',
+      pill_https:        'HTTPS',
+      history_title:     'Links recientes',
+      history_clear:     'Limpiar historial',
+      history_copy:      'Copiar',
+      footer_love:       'Hecho con amor, café y una pizca de IA ☕',
+      footer_powered:    'Powered by is.gd API · Sin servidores propios',
+      github_tooltip:    'Ver en GitHub',
+      error_empty:       'Por favor ingresá una URL.',
+      error_invalid:     'La URL no es válida. Debe empezar con http:// o https://',
+      error_connection:  'Error de conexión. Verificá tu internet e intentá de nuevo.',
+      error_api:         'No se pudo acortar la URL. Intentá de nuevo.',
+      chars_saved:       'caracteres ahorrados',
+    },
+    en: {
+      logo_sub:          'Shorten any URL instantly · No signup · 100% free',
+      input_label:       'Paste your long URL',
+      input_placeholder: 'https://example.com/a/very/long/url/here...',
+      btn_shorten:       'Shorten URL →',
+      btn_loading:       'Shortening...',
+      btn_copy:          'Copy',
+      btn_copied:        'Copied!',
+      result_label:      'Your short link',
+      pill_secure:       'is.gd · secure',
+      pill_https:        'HTTPS',
+      history_title:     'Recent links',
+      history_clear:     'Clear history',
+      history_copy:      'Copy',
+      footer_love:       'Made with love, coffee and a pinch of AI ☕',
+      footer_powered:    'Powered by is.gd API · No own servers',
+      github_tooltip:    'View on GitHub',
+      error_empty:       'Please enter a URL.',
+      error_invalid:     'Invalid URL. It must start with http:// or https://',
+      error_connection:  'Connection error. Check your internet and try again.',
+      error_api:         'Could not shorten the URL. Please try again.',
+      chars_saved:       'characters saved',
+    },
+    pt: {
+      logo_sub:          'Encurte qualquer URL na hora · Sem cadastro · 100% grátis',
+      input_label:       'Cole sua URL longa',
+      input_placeholder: 'https://exemplo.com/uma/url/muito/longa...',
+      btn_shorten:       'Encurtar URL →',
+      btn_loading:       'Encurtando...',
+      btn_copy:          'Copiar',
+      btn_copied:        'Copiado!',
+      result_label:      'Seu link curto',
+      pill_secure:       'is.gd · seguro',
+      pill_https:        'HTTPS',
+      history_title:     'Links recentes',
+      history_clear:     'Limpar histórico',
+      history_copy:      'Copiar',
+      footer_love:       'Feito com amor, café e uma pitada de IA ☕',
+      footer_powered:    'Powered by is.gd API · Sem servidores próprios',
+      github_tooltip:    'Ver no GitHub',
+      error_empty:       'Por favor insira uma URL.',
+      error_invalid:     'URL inválida. Deve começar com http:// ou https://',
+      error_connection:  'Erro de conexão. Verifique sua internet e tente novamente.',
+      error_api:         'Não foi possível encurtar a URL. Tente novamente.',
+      chars_saved:       'caracteres economizados',
+    }
+  };
+
+  const LANG_META = {
+    es: { flag: '🇦🇷', code: 'ES' },
+    en: { flag: '🇺🇸', code: 'EN' },
+    pt: { flag: '🇧🇷', code: 'PT' },
+  };
+
+  let currentLang = 'es';
+
+  function t(key) {
+    return (TRANSLATIONS[currentLang] && TRANSLATIONS[currentLang][key])
+      || TRANSLATIONS.es[key]
+      || key;
+  }
+
+  function applyLanguage(lang) {
+    if (!TRANSLATIONS[lang]) lang = 'es';
+    currentLang = lang;
+    localStorage.setItem('cortoly_lang', lang);
+
+    // Update <html lang>
+    document.documentElement.lang = lang;
+
+    // Update all data-i18n elements
+    document.querySelectorAll('[data-i18n]').forEach(function(el) {
+      var key = el.dataset.i18n;
+      if (TRANSLATIONS[lang][key] !== undefined) el.textContent = TRANSLATIONS[lang][key];
+    });
+
+    // Update placeholders
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+      var key = el.dataset.i18nPlaceholder;
+      if (TRANSLATIONS[lang][key] !== undefined) el.placeholder = TRANSLATIONS[lang][key];
+    });
+
+    // Update title / aria-label attributes
+    document.querySelectorAll('[data-i18n-title]').forEach(function(el) {
+      var key = el.dataset.i18nTitle;
+      if (TRANSLATIONS[lang][key] !== undefined) {
+        el.title = TRANSLATIONS[lang][key];
+        el.setAttribute('aria-label', TRANSLATIONS[lang][key]);
+      }
+    });
+
+    // Update language picker button
+    var meta = LANG_META[lang];
+    document.getElementById('lang-flag').textContent = meta.flag;
+    document.getElementById('lang-code').textContent = meta.code;
+
+    // Update checkmarks in dropdown
+    ['es', 'en', 'pt'].forEach(function(l) {
+      document.getElementById('check-' + l).textContent = l === lang ? '✓' : '';
+    });
+
+    // Re-render history so copy buttons use the new language
+    renderHistory();
+  }
+
+  // ── Language Picker ───────────────────────────────────────────────────────
+  var langBtn  = document.getElementById('lang-btn');
+  var langMenu = document.getElementById('lang-menu');
+
+  langBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isOpen = langMenu.classList.contains('open');
+    langMenu.classList.toggle('open', !isOpen);
+    langBtn.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  document.addEventListener('click', function() {
+    langMenu.classList.remove('open');
+    langBtn.setAttribute('aria-expanded', 'false');
+  });
+
+  langMenu.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var li = e.target.closest('li[data-lang]');
+    if (li) {
+      applyLanguage(li.dataset.lang);
+      langMenu.classList.remove('open');
+      langBtn.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  // ── App ──────────────────────────────────────────────────────────────────
+  const input      = document.getElementById('url-input');
+  const btn        = document.getElementById('shorten-btn');
+  const valMsg     = document.getElementById('val-msg');
+  const spinner    = document.getElementById('spinner');
+  const errorMsg   = document.getElementById('error-msg');
+  const resultCard = document.getElementById('result-card');
+  const shortLink  = document.getElementById('short-url-link');
+  const copyBtn    = document.getElementById('copy-btn');
+  const savingsMsg = document.getElementById('savings-msg');
+  const histSec    = document.getElementById('history-section');
+  const histList   = document.getElementById('history-list');
+  const clearBtn   = document.getElementById('clear-btn');
+
+  const STORAGE_KEY = 'cortoly_history';
+  const MAX_ITEMS   = 5;
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  function isValidUrl(str) {
+    return /^https?:\/\/.+/i.test(str.trim());
+  }
+
+  function loadHistory() {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+    catch { return []; }
+  }
+
+  function saveHistory(items) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+  }
+
+  function copyToClipboard(text, btnEl) {
+    navigator.clipboard.writeText(text).then(function() {
+      var prev = btnEl.textContent;
+      btnEl.textContent = t('btn_copied');
+      setTimeout(function() { btnEl.textContent = prev; }, 1800);
+    });
+  }
+
+  // ── Render history ────────────────────────────────────────────────────────
+
+  function renderHistory() {
+    var items = loadHistory();
+    if (!items.length) { histSec.classList.remove('show'); return; }
+
+    histSec.classList.add('show');
+    histList.innerHTML = '';
+
+    items.forEach(function(item) {
+      var short    = item.short;
+      var original = item.original;
+      var li = document.createElement('li');
+      li.className = 'history-item';
+      var safeShort    = short.replace(/"/g, '&quot;');
+      var safeOriginal = original.replace(/"/g, '&quot;');
+      li.innerHTML =
+        '<a class="hi-short" href="' + safeShort + '" target="_blank" rel="noopener">' + safeShort + '</a>' +
+        '<span class="hi-orig" title="' + safeOriginal + '">' + safeOriginal + '</span>' +
+        '<button class="btn-copy-sm" data-url="' + safeShort + '">' + t('history_copy') + '</button>';
+      li.querySelector('.btn-copy-sm').addEventListener('click', function() {
+        copyToClipboard(this.dataset.url, this);
+      });
+      histList.appendChild(li);
+    });
+  }
+
+  function addToHistory(short, original) {
+    var items = loadHistory().filter(function(i) { return i.short !== short; });
+    items.unshift({ short: short, original: original });
+    if (items.length > MAX_ITEMS) items = items.slice(0, MAX_ITEMS);
+    saveHistory(items);
+    renderHistory();
+  }
+
+  // ── UI state helpers ──────────────────────────────────────────────────────
+
+  function setLoading(on) {
+    btn.disabled = on;
+    input.disabled = on;
+    spinner.classList.toggle('show', on);
+  }
+
+  function showError(msg) {
+    errorMsg.textContent = msg;
+    errorMsg.classList.add('show');
+  }
+
+  function clearError() {
+    errorMsg.classList.remove('show');
+  }
+
+  function showResult(shortUrl, originalUrl) {
+    shortLink.textContent = shortUrl;
+    shortLink.href = shortUrl;
+
+    var saved = originalUrl.length - shortUrl.length;
+    savingsMsg.innerHTML = saved > 0
+      ? '<strong>' + saved + '</strong> ' + t('chars_saved') + ' (' + originalUrl.length + ' → ' + shortUrl.length + ')'
+      : '';
+
+    resultCard.classList.add('show');
+  }
+
+  // ── Main action ───────────────────────────────────────────────────────────
+
+  async function shorten() {
+    var raw = input.value.trim();
+
+    valMsg.textContent = '';
+    input.classList.remove('invalid');
+    clearError();
+    resultCard.classList.remove('show');
+
+    if (!raw) {
+      valMsg.textContent = t('error_empty');
+      input.classList.add('invalid');
+      input.focus();
+      return;
+    }
+
+    if (!isValidUrl(raw)) {
+      valMsg.textContent = t('error_invalid');
+      input.classList.add('invalid');
+      input.focus();
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      var apiUrl = 'https://is.gd/create.php?format=json&url=' + encodeURIComponent(raw);
+      var res    = await fetch(apiUrl);
+
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+
+      var data = await res.json();
+
+      if (data.errorcode) {
+        showError(t('error_api'));
+        return;
+      }
+
+      if (!data.shorturl) throw new Error('Unexpected API response.');
+
+      showResult(data.shorturl, raw);
+      addToHistory(data.shorturl, raw);
+
+    } catch (err) {
+      if (err.name === 'TypeError') {
+        showError(t('error_connection'));
+      } else {
+        showError(t('error_api'));
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  // ── Events ────────────────────────────────────────────────────────────────
+
+  btn.addEventListener('click', shorten);
+
+  input.addEventListener('keydown', function(e) { if (e.key === 'Enter') shorten(); });
+
+  input.addEventListener('input', function() {
+    if (input.classList.contains('invalid')) {
+      input.classList.remove('invalid');
+      valMsg.textContent = '';
+    }
+  });
+
+  copyBtn.addEventListener('click', function() {
+    copyToClipboard(shortLink.textContent, copyBtn);
+  });
+
+  clearBtn.addEventListener('click', function() {
+    saveHistory([]);
+    renderHistory();
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+
+  (function initLang() {
+    var saved = localStorage.getItem('cortoly_lang');
+    if (saved && TRANSLATIONS[saved]) {
+      applyLanguage(saved);
+    } else {
+      var nav = ((navigator.language || 'es').slice(0, 2)).toLowerCase();
+      applyLanguage(TRANSLATIONS[nav] ? nav : 'es');
+    }
+  })();
+</script>
+
+</body>
+</html>
