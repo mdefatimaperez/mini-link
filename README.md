@@ -50,7 +50,6 @@ Si querés correr el proyecto en tu computadora:
 git clone https://github.com/mdefatimaperez/mini-link
 
 # 2. Entrar a la carpeta
-cd 
 
 # 3. Abrir en el navegador
 # Simplemente abrí el archivo index.html en tu navegador
