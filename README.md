@@ -1,4 +1,4 @@
-# corto.ly ✂️
+# mini-link ✂️
 
 > Acortador de URLs minimalista, rápido y sin registro.  
 > Construido con HTML, CSS y JavaScript puro. Sin backend, sin base de datos.
@@ -27,7 +27,7 @@
 
 ## 🚀 Demo
 
-👉 **[tuusuario.github.io/cortoly](https://tuusuario.github.io/cortoly)**
+👉 ****
 
 ---
 
@@ -47,10 +47,10 @@ Si querés correr el proyecto en tu computadora:
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/TU_USUARIO/cortoly.git
+git clone 
 
 # 2. Entrar a la carpeta
-cd cortoly
+cd 
 
 # 3. Abrir en el navegador
 # Simplemente abrí el archivo index.html en tu navegador
@@ -70,16 +70,6 @@ cd cortoly
 7. Tu app estará disponible en: `tuusuario.github.io/nombre-repo`
 
 ---
-
-## 🏗️ Estructura del proyecto
-
-```
-cortoly/
-├── index.html        # Toda la app (HTML + CSS + JS)
-├── .gitignore        # Archivos ignorados por Git
-├── LICENSE           # Licencia MIT
-└── README.md         # Este archivo
-```
 
 ---
 
@@ -110,15 +100,6 @@ No requiere API key. Límite de uso: uso razonable según [términos de is.gd](h
 3. Hacé tus cambios y commiteá: `git commit -m 'Agrego mi mejora'`
 4. Pusheá: `git push origin feature/mi-mejora`
 5. Abrí un Pull Request
-
----
-
-## 📋 Roadmap
-
-- [ ] Soporte para alias personalizados
-- [ ] QR code del link acortado
-- [ ] Estadísticas de clicks
-- [ ] PWA (funciona offline)
 
 ---
 
