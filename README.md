@@ -1,7 +1,7 @@
 # mini-link ✂️
 
-> Acortador de URLs minimalista, rápido y sin registro.  
-> Construido con HTML, CSS y JavaScript puro. Sin backend, sin base de datos.
+> Minimalist, fast and registration-free URL shortener.  
+> Built with pure HTML, CSS and JavaScript. No backend, no database.
 
 ![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-deployed-brightgreen?logo=github)
 ![HTML](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
@@ -12,70 +12,73 @@
 
 ---
 
-## ✨ Características
+## ✨ Features
 
-- 🔗 Acorta cualquier URL al instante
-- 📋 Copia el link corto con un clic
-- 🕓 Historial de los últimos 5 links (guardado localmente)
-- 📱 Responsive — funciona en móvil y desktop
-- 🌙 Dark mode automático
-- ☁️ Sin servidores propios — usa la API pública de [is.gd](https://is.gd)
-- ⚡ Sin dependencias — un solo archivo HTML
-- 🔒 Sin tracking, sin cookies, sin registro
+- 🔗 Shorten any URL instantly
+- 📋 Copy the short link with one click
+- 🕓 History of the last 5 links (saved locally)
+- 📱 Responsive — works on mobile and desktop
+- 🌙 Automatic dark mode
+- ☁️ No own servers — uses the public [is.gd](https://is.gd) API
+- ⚡ Zero dependencies — single HTML file
+- 🔒 No tracking, no cookies, no signup
+- 🌍 Available in 3 languages — 🇦🇷 Spanish · 🇺🇸 English · 🇧🇷 Portuguese
 
 ---
 
 ## 🚀 Demo
 
-👉 ****
+👉 **[mdefatimaperez.github.io/mini-link](https://mdefatimaperez.github.io/mini-link)**
 
 ---
 
-## 🛠️ Cómo usar la herramienta
+## 🛠️ How to use
 
-1. Abrí la página web
-2. Pegá cualquier URL larga en el campo de texto
-3. Hacé clic en **Acortar URL** (o presioná `Enter`)
-4. Copiá el link corto generado con el botón **Copiar**
-5. ¡Listo! El link funciona en cualquier navegador del mundo
+1. Open the web page
+2. Paste any long URL into the text field
+3. Click **Shorten URL** (or press `Enter`)
+4. Copy the generated short link with the **Copy** button
+5. Done! The link works in any browser worldwide
 
 ---
 
-## 📦 Instalación local
+## 📦 Local installation
 
-Si querés correr el proyecto en tu computadora:
+To run the project on your computer:
 
 ```bash
-# 1. Clonar el repositorio
+# 1. Clone the repository
 git clone https://github.com/mdefatimaperez/mini-link
 
-# 2. Entrar a la carpeta
+# 2. Enter the folder
+cd mini-link
 
-# 3. Abrir en el navegador
-# Simplemente abrí el archivo index.html en tu navegador
-# No necesita servidor, no necesita npm install
+# 3. Open in the browser
+# Simply open index.html in your browser
+# No server needed, no npm install required
 ```
 
-## 🔌 API utilizada
+---
 
-Este proyecto usa la API pública de **[is.gd](https://is.gd)**:
+## 🔌 API
 
-```
-GET https://is.gd/create.php?format=json&url=TU_URL
-```
+This project uses the public **[is.gd](https://is.gd)** API:
+GET https://is.gd/create.php?format=json&url=YOUR_URL
 
-Respuesta:
-
+Response:
 ```json
 { "shorturl": "https://is.gd/abc123" }
 ```
 
-No requiere API key. Límite de uso: uso razonable según [términos de is.gd](https://is.gd/terms.php).
+No API key required. Usage limit: reasonable use per [is.gd terms](https://is.gd/terms.php).
 
 ---
-## 📄 Licencia
 
-Este proyecto está bajo la licencia **MIT**.  
-Podés usarlo, modificarlo y distribuirlo libremente.
+## 📄 License
+
+This project is licensed under the **MIT License**.  
+Free to use, modify and distribute.
 
 ---
+
+> Made with love and a pinch of AI ☕
