@@ -47,7 +47,7 @@ Si querés correr el proyecto en tu computadora:
 
 ```bash
 # 1. Clonar el repositorio
-git clone 
+git clone https://github.com/mdefatimaperez/mini-link
 
 # 2. Entrar a la carpeta
 cd 
@@ -56,22 +56,6 @@ cd
 # Simplemente abrí el archivo index.html en tu navegador
 # No necesita servidor, no necesita npm install
 ```
-
----
-
-## 🌐 Deploy en GitHub Pages (paso a paso)
-
-1. Subí el código a un repositorio en GitHub
-2. Andá a **Settings → Pages** (en el menú lateral)
-3. En "Source" seleccioná: **Deploy from a branch**
-4. En "Branch" seleccioná: **main → / (root)**
-5. Hacé clic en **Save**
-6. Esperá 1-2 minutos
-7. Tu app estará disponible en: `tuusuario.github.io/nombre-repo`
-
----
-
----
 
 ## 🔌 API utilizada
 
@@ -90,24 +74,9 @@ Respuesta:
 No requiere API key. Límite de uso: uso razonable según [términos de is.gd](https://is.gd/terms.php).
 
 ---
-
-## 🤝 Contribuciones
-
-¡Las contribuciones son bienvenidas! Si querés mejorar el proyecto:
-
-1. Hacé un Fork del repositorio
-2. Creá una rama: `git checkout -b feature/mi-mejora`
-3. Hacé tus cambios y commiteá: `git commit -m 'Agrego mi mejora'`
-4. Pusheá: `git push origin feature/mi-mejora`
-5. Abrí un Pull Request
-
----
-
 ## 📄 Licencia
 
 Este proyecto está bajo la licencia **MIT**.  
 Podés usarlo, modificarlo y distribuirlo libremente.
 
 ---
-
-> Hecho con amor, café y una pizca de IA ☕
